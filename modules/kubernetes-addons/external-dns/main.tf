@@ -72,3 +72,15 @@ resource "aws_iam_policy" "external_dns" {
   policy      = data.aws_iam_policy_document.external_dns_iam_policy_document.json
   tags        = var.addon_context.tags
 }
+
+# TODO - remove at next breaking change
+data "aws_route53_zone" "selected" {
+  count = var.route53_zone_arns != "" ? 1 : 0
+  name         = var.domain_name
+  private_zone = var.private_zone
+}
+
+locals {
+  data_aws_route53 = data.aws_route53_zone.selected[0] != "" ? data.aws_route53_zone.selected[0].arn : ""
+  route53_zone_arns = merge(var.route53_zone_arns, local.data_aws_route53)
+}
